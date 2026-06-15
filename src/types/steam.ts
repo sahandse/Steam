@@ -21,7 +21,7 @@ export interface AppDetails {
   type: string
   name: string
   steam_appid: number
-  required_age: number
+  required_age: number | string
   is_free: boolean
   detailed_description: string
   short_description: string
@@ -29,6 +29,8 @@ export interface AppDetails {
   website: string | null
   developers: string[]
   publishers: string[]
+  dlc?: number[]
+  packages?: number[]
   price_overview?: {
     currency: string
     initial: number
@@ -37,10 +39,7 @@ export interface AppDetails {
     final_formatted: string
     initial_formatted: string
   }
-  release_date: {
-    coming_soon: boolean
-    date: string
-  }
+  release_date: { coming_soon: boolean; date: string }
   genres?: { id: string; description: string }[]
   categories?: { id: number; description: string }[]
   screenshots?: { id: number; path_thumbnail: string; path_full: string }[]
@@ -98,6 +97,51 @@ export interface MarketSearchResult {
   pagesize: number
   total_count: number
   results: MarketItem[]
+}
+
+export interface Review {
+  recommendationid: string
+  review: string
+  author: {
+    steamid: string
+    playtime_at_review: number
+    playtime_forever: number
+  }
+  voted_up: boolean
+  votes_up: number
+  timestamp_created: number
+  language: string
+}
+
+export interface ReviewSummary {
+  review_score: number
+  review_score_desc: string
+  total_positive: number
+  total_negative: number
+  total_reviews: number
+}
+
+export interface ReviewsResponse {
+  query_summary: ReviewSummary
+  reviews: Review[]
+  success: number
+}
+
+export interface DLCBasicInfo {
+  steam_appid: number
+  name: string
+  header_image: string
+  is_free: boolean
+  price_overview?: { final_formatted: string; discount_percent: number }
+}
+
+export type PricePoint = [string, string, string]
+
+export interface PriceHistoryResponse {
+  success: boolean
+  prices: PricePoint[]
+  price_prefix: string
+  price_suffix: string
 }
 
 export type View = 'home' | 'search' | 'details' | 'market' | 'suggest'
