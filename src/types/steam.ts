@@ -100,4 +100,4 @@ export interface MarketSearchResult {
   results: MarketItem[]
 }
 
-export type View = 'home' | 'search' | 'details' | 'market'
+export type View = 'home' | 'search' | 'details' | 'market' | 'suggest'

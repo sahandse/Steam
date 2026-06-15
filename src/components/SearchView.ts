@@ -1,25 +1,22 @@
 import { steamApi } from '../api/steam'
 import type { SteamApp } from '../types/steam'
 
-let currentTerm = ''
-
-function renderAppCard(app: SteamApp, onClick: (id: number) => void): HTMLElement {
-  const card = document.createElement('div')
-  card.className = 'game-card'
-  card.setAttribute('role', 'button')
-  card.setAttribute('tabindex', '0')
+function appCard(app: SteamApp, onClick: (id: number) => void): HTMLElement {
+  const el = document.createElement('div')
+  el.className = 'game-card'
+  el.tabIndex = 0
 
   const priceHtml = app.price
     ? app.price.discount_percent > 0
       ? `<div class="price-row">
-          <span class="badge-discount">-${app.price.discount_percent}%</span>
-          <span class="price-original">${app.price.initial_formatted}</span>
+          <span class="badge-discount">٪${app.price.discount_percent}-</span>
           <span class="price-final">${app.price.final_formatted}</span>
+          <span class="price-original">${app.price.initial_formatted}</span>
          </div>`
       : `<div class="price-row"><span class="price-final">${app.price.final_formatted}</span></div>`
-    : '<div class="price-row"><span class="price-final">Free / N/A</span></div>'
+    : '<div class="price-row"><span class="free-label">رایگان</span></div>'
 
-  card.innerHTML = `
+  el.innerHTML = `
     <div class="card-image-wrap">
       <img src="${app.tiny_image}" alt="${app.name}" loading="lazy" />
     </div>
@@ -29,11 +26,10 @@ function renderAppCard(app: SteamApp, onClick: (id: number) => void): HTMLElemen
     </div>
   `
 
-  const activate = () => onClick(app.id)
-  card.addEventListener('click', activate)
-  card.addEventListener('keydown', (e) => { if (e.key === 'Enter') activate() })
-
-  return card
+  const go = () => onClick(app.id)
+  el.addEventListener('click', go)
+  el.addEventListener('keydown', (e) => { if (e.key === 'Enter') go() })
+  return el
 }
 
 export function renderSearchView(
@@ -41,18 +37,16 @@ export function renderSearchView(
   onAppClick: (appid: number) => void,
   initialTerm = ''
 ): void {
-  currentTerm = initialTerm
+  let currentTerm = initialTerm
 
   container.innerHTML = `
-    <section class="search-section">
-      <h2 class="section-title">Search Games</h2>
-      <div class="search-bar">
-        <input type="text" id="search-input" placeholder="Search for a game..." value="${initialTerm}" autocomplete="off" />
-        <button id="search-btn" class="btn-primary">Search</button>
-      </div>
-      <div id="search-results" class="game-grid"></div>
-      <div id="pagination" class="pagination"></div>
-    </section>
+    <div class="section-title">جستجوی بازی</div>
+    <div class="search-row">
+      <input class="input" id="search-input" type="text" placeholder="نام بازی را بنویسید..." value="${initialTerm}" autocomplete="off" />
+      <button class="btn btn-primary" id="search-btn">جستجو</button>
+    </div>
+    <div id="results" class="game-grid"></div>
+    <div id="pager" class="pagination"></div>
   `
 
   const input = container.querySelector('#search-input') as HTMLInputElement
@@ -61,67 +55,58 @@ export function renderSearchView(
   const doSearch = async (term: string, page: number) => {
     if (!term.trim()) return
     currentTerm = term
-
-    const grid = container.querySelector('#search-results') as HTMLElement
-    const pag = container.querySelector('#pagination') as HTMLElement
-    grid.innerHTML = Array(6).fill('<div class="skeleton-card"></div>').join('')
-    pag.innerHTML = ''
+    const grid = container.querySelector('#results') as HTMLElement
+    const pager = container.querySelector('#pager') as HTMLElement
+    grid.innerHTML = Array(6).fill('<div class="skeleton skeleton-card"></div>').join('')
+    pager.innerHTML = ''
 
     try {
       const data = await steamApi.search(term, String(page))
       grid.innerHTML = ''
 
-      if (!data.items || data.items.length === 0) {
-        grid.innerHTML = '<p class="empty-msg">No results found.</p>'
+      if (!data.items?.length) {
+        grid.innerHTML = '<p class="empty-msg">نتیجه‌ای پیدا نشد.</p>'
         return
       }
 
-      data.items.forEach((app) => grid.appendChild(renderAppCard(app, onAppClick)))
+      data.items.forEach((app) => grid.appendChild(appCard(app, onAppClick)))
 
       const totalPages = Math.ceil(data.total / 25)
-      if (totalPages > 1) {
-        renderPagination(pag, page, totalPages, (p) => doSearch(currentTerm, p))
-      }
+      if (totalPages > 1) renderPager(pager, page, totalPages, (p) => doSearch(currentTerm, p))
     } catch {
-      grid.innerHTML = '<p class="error-msg">Search failed. Please try again.</p>'
+      grid.innerHTML = '<p class="error-msg">جستجو با خطا مواجه شد.</p>'
     }
   }
 
   btn.addEventListener('click', () => doSearch(input.value, 1))
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doSearch(input.value, 1)
-  })
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(input.value, 1) })
 
-  if (initialTerm) {
-    doSearch(initialTerm, 1)
-  }
-
-  setTimeout(() => input.focus(), 50)
+  if (initialTerm) doSearch(initialTerm, 1)
+  else setTimeout(() => input.focus(), 50)
 }
 
-function renderPagination(
-  container: HTMLElement,
+function renderPager(
+  el: HTMLElement,
   current: number,
   total: number,
-  onPage: (page: number) => void
+  onPage: (p: number) => void
 ): void {
-  container.innerHTML = ''
-
+  el.innerHTML = ''
   const prev = document.createElement('button')
   prev.className = 'btn-page'
-  prev.textContent = '← Prev'
+  prev.textContent = 'قبلی'
   prev.disabled = current === 1
-  prev.addEventListener('click', () => onPage(current - 1))
+  prev.onclick = () => onPage(current - 1)
 
   const info = document.createElement('span')
   info.className = 'page-info'
-  info.textContent = `Page ${current} of ${total}`
+  info.textContent = `صفحه ${current} از ${total}`
 
   const next = document.createElement('button')
   next.className = 'btn-page'
-  next.textContent = 'Next →'
+  next.textContent = 'بعدی'
   next.disabled = current === total
-  next.addEventListener('click', () => onPage(current + 1))
+  next.onclick = () => onPage(current + 1)
 
-  container.append(prev, info, next)
+  el.append(next, info, prev)
 }

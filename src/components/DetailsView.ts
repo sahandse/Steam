@@ -6,9 +6,9 @@ export async function renderDetailsView(
   onBack: () => void
 ): Promise<void> {
   container.innerHTML = `
-    <div class="details-loading">
+    <div class="loading-state">
       <div class="spinner"></div>
-      <p>Loading game details...</p>
+      <p>در حال بارگذاری...</p>
     </div>
   `
 
@@ -17,94 +17,103 @@ export async function renderDetailsView(
 
     if (!app) {
       container.innerHTML = `
-        <div class="error-state">
-          <p class="error-msg">Could not load game details.</p>
-          <button class="btn-primary" id="back-btn">← Go Back</button>
-        </div>
+        <button class="btn-back" id="back">بازگشت</button>
+        <p class="error-msg">اطلاعات بازی یافت نشد.</p>
       `
-      container.querySelector('#back-btn')?.addEventListener('click', onBack)
+      container.querySelector('#back')?.addEventListener('click', onBack)
       return
     }
 
-    const price = app.price_overview
+    const priceHtml = app.price_overview
       ? app.price_overview.discount_percent > 0
         ? `<div class="price-block">
-            <span class="badge-discount">-${app.price_overview.discount_percent}%</span>
-            <span class="price-original">${app.price_overview.initial_formatted}</span>
+            <span class="badge-discount">٪${app.price_overview.discount_percent}-</span>
             <span class="price-final">${app.price_overview.final_formatted}</span>
+            <span class="price-original">${app.price_overview.initial_formatted}</span>
            </div>`
         : `<div class="price-block"><span class="price-final">${app.price_overview.final_formatted}</span></div>`
       : app.is_free
-        ? `<div class="price-block"><span class="price-final free-tag">Free to Play</span></div>`
-        : `<div class="price-block"><span class="price-final">N/A</span></div>`
+        ? `<div class="price-block"><span class="free-label">رایگان</span></div>`
+        : ''
 
-    const genres = app.genres?.map((g) => `<span class="tag">${g.description}</span>`).join('') ?? ''
-    const categories = app.categories?.slice(0, 6).map((c) => `<span class="tag tag-alt">${c.description}</span>`).join('') ?? ''
+    const genres = (app.genres ?? []).map((g) => `<span class="tag">${g.description}</span>`).join('')
+    const cats = (app.categories ?? []).slice(0, 5).map((c) => `<span class="tag">${c.description}</span>`).join('')
 
-    const metacritic = app.metacritic
-      ? `<div class="metacritic">
-          <span class="mc-score" style="background:${app.metacritic.score >= 75 ? '#66c0f4' : app.metacritic.score >= 50 ? '#f4c266' : '#e57373'}">
+    const meta = app.metacritic
+      ? `<div class="metacritic-block">
+          <div class="mc-score" style="background:${app.metacritic.score >= 75 ? '#4caf78' : app.metacritic.score >= 50 ? '#d4a843' : '#e05252'}">
             ${app.metacritic.score}
-          </span>
-          <span>Metacritic</span>
-         </div>`
+          </div>
+          <div>
+            <div style="font-weight:600;color:var(--text)">Metacritic</div>
+            <div style="font-size:.78rem">امتیاز منتقدان</div>
+          </div>
+        </div>`
       : ''
 
-    const screenshots = app.screenshots?.slice(0, 4).map((s) =>
-      `<img src="${s.path_thumbnail}" alt="Screenshot" class="screenshot" loading="lazy" />`
-    ).join('') ?? ''
+    const shots = (app.screenshots ?? []).slice(0, 4).map((s) =>
+      `<img src="${s.path_thumbnail}" class="screenshot" loading="lazy" alt="" />`
+    ).join('')
 
     container.innerHTML = `
-      <button class="btn-back" id="back-btn">← Back</button>
-      <div class="details-wrapper">
-        <div class="details-hero" style="background-image: url('${app.header_image}')">
+      <button class="btn-back" id="back">بازگشت</button>
+      <div class="details-wrap">
+        <div class="details-hero">
+          <img src="${app.header_image}" alt="${app.name}" />
           <div class="details-hero-overlay">
             <h1 class="details-title">${app.name}</h1>
-            ${price}
+            ${priceHtml}
           </div>
         </div>
 
         <div class="details-body">
           <div class="details-main">
             <p class="short-desc">${app.short_description}</p>
-            <div class="tags-row">${genres}${categories}</div>
+            <div class="tags-row">${genres}${cats}</div>
 
-            ${screenshots
-              ? `<h3 class="sub-heading">Screenshots</h3>
-                 <div class="screenshots-grid">${screenshots}</div>`
-              : ''}
+            ${shots ? `<div class="sub-heading">تصاویر</div><div class="screenshots-grid">${shots}</div>` : ''}
 
-            <h3 class="sub-heading">About</h3>
+            <div class="sub-heading">درباره بازی</div>
             <div class="long-desc">${app.detailed_description}</div>
           </div>
 
           <aside class="details-sidebar">
-            ${metacritic}
+            ${meta}
             <div class="info-block">
-              <div class="info-row"><span class="info-label">Developer</span><span>${app.developers?.join(', ') ?? 'N/A'}</span></div>
-              <div class="info-row"><span class="info-label">Publisher</span><span>${app.publishers?.join(', ') ?? 'N/A'}</span></div>
-              <div class="info-row"><span class="info-label">Release Date</span><span>${app.release_date?.date ?? 'TBA'}</span></div>
-              <div class="info-row"><span class="info-label">Type</span><span>${app.type}</span></div>
+              <div class="info-row">
+                <span class="info-label">سازنده</span>
+                <span class="info-value">${app.developers?.join('، ') ?? '—'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">ناشر</span>
+                <span class="info-value">${app.publishers?.join('، ') ?? '—'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">تاریخ انتشار</span>
+                <span class="info-value">${app.release_date?.date ?? '—'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">نوع</span>
+                <span class="info-value">${app.type}</span>
+              </div>
             </div>
             <a
               href="https://store.steampowered.com/app/${appid}"
               target="_blank"
               rel="noopener noreferrer"
-              class="btn-primary steam-link"
-            >View on Steam ↗</a>
+              class="steam-link"
+            >مشاهده در استیم ↗</a>
           </aside>
         </div>
       </div>
     `
 
-    container.querySelector('#back-btn')?.addEventListener('click', onBack)
+    container.querySelector('#back')?.addEventListener('click', onBack)
   } catch {
     container.innerHTML = `
-      <div class="error-state">
-        <p class="error-msg">Failed to load game details.</p>
-        <button class="btn-primary" id="back-btn">← Go Back</button>
-      </div>
+      <button class="btn-back" id="back">بازگشت</button>
+      <p class="error-msg">بارگذاری اطلاعات با خطا مواجه شد.</p>
     `
-    container.querySelector('#back-btn')?.addEventListener('click', onBack)
+    container.querySelector('#back')?.addEventListener('click', onBack)
   }
 }
