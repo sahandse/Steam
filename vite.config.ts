@@ -1,16 +1,23 @@
 import { defineConfig } from 'vite'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  base: mode === 'production' ? '/Steam/' : '/',
   server: {
     port: 5173,
     proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
+      '/steam-store': {
+        target: 'https://store.steampowered.com',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/steam-store/, ''),
+      },
+      '/steam-community': {
+        target: 'https://steamcommunity.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/steam-community/, ''),
       },
     },
   },
   build: {
     outDir: 'dist/client',
   },
-})
+}))

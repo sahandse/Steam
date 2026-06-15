@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Steam Web App using Internal Steam Web API",
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "client": "vite",
+    "dev": "vite",
     "server": "ts-node-dev --respawn --transpile-only server/index.ts",
-    "build": "tsc -p tsconfig.server.json && vite build",
+    "build": "vite build",
+    "build:full": "tsc -p tsconfig.server.json && vite build",
     "start": "node dist/server/index.js"
   },
   "dependencies": {
