@@ -593,6 +593,110 @@ a { color: var(--accent); text-decoration: none; }
   border-radius: 20px;
 }
 
+/* ── Live Players ── */
+.stat-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.players-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .78rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(76,175,120,.5); }
+  70%  { box-shadow: 0 0 0 7px rgba(76,175,120,0); }
+  100% { box-shadow: 0 0 0 0 rgba(76,175,120,0); }
+}
+.pulse-dot {
+  width: 9px;
+  height: 9px;
+  background: #4caf78;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pulse-ring 2s infinite;
+}
+.players-count {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #4caf78;
+  line-height: 1;
+  margin-bottom: 4px;
+  letter-spacing: -1px;
+}
+.players-exact { font-size: .75rem; color: var(--muted); }
+
+/* ── Achievements ── */
+.ach-toggle-btn {
+  font-family: var(--font);
+  font-size: .75rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 3px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: all .15s;
+}
+.ach-toggle-btn:hover { color: var(--text); border-color: var(--border-hover); }
+
+.ach-group-label {
+  font-size: .78rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.ach-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.ach-name {
+  font-size: .78rem;
+  color: var(--text);
+  width: 160px;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: ltr;
+  text-align: left;
+}
+.ach-bar-wrap {
+  flex: 1;
+  height: 5px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.ach-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width .5s var(--ease);
+}
+.ach-pct {
+  font-size: .75rem;
+  color: var(--muted);
+  width: 42px;
+  text-align: left;
+  flex-shrink: 0;
+  direction: ltr;
+}
+.ach-total {
+  font-size: .78rem;
+  color: var(--muted);
+  margin-top: 14px;
+  text-align: center;
+}
+
 /* ── Free badge ── */
 .badge-free {
   background: #4caf78;

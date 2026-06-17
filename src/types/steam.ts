@@ -144,4 +144,17 @@ export interface PriceHistoryResponse {
   price_suffix: string
 }
 
+export interface PlayersResponse {
+  response: { player_count: number; result: number }
+}
+
+export interface AchievementPercent {
+  name: string
+  percent: number
+}
+
+export interface AchievementsResponse {
+  achievementpercentages: { achievements: AchievementPercent[] }
+}
+
 export type View = 'home' | 'search' | 'details' | 'market' | 'suggest'

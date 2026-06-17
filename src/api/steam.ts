@@ -1,6 +1,7 @@
 import type {
   SearchResult, AppDetails, FeaturedResponse, MarketSearchResult,
   ReviewsResponse, DLCBasicInfo, PriceHistoryResponse,
+  PlayersResponse, AchievementsResponse,
 } from '../types/steam'
 
 const IS_PROD = import.meta.env.PROD
@@ -13,6 +14,17 @@ function storeUrl(path: string, params: Record<string, string> = {}): string {
     return `${CORS}${encodeURIComponent(u.toString())}`
   }
   const u = new URL(`/steam-store${path}`, window.location.origin)
+  Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, v))
+  return u.toString()
+}
+
+function apiUrl(path: string, params: Record<string, string> = {}): string {
+  if (IS_PROD) {
+    const u = new URL(`https://api.steampowered.com${path}`)
+    Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, v))
+    return `${CORS}${encodeURIComponent(u.toString())}`
+  }
+  const u = new URL(`/steam-api${path}`, window.location.origin)
   Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, v))
   return u.toString()
 }
@@ -89,4 +101,14 @@ export const steamApi = {
     get<PriceHistoryResponse>(communityUrl('/market/pricehistory', {
       appid, market_hash_name, currency: '1',
     })),
+
+  getCurrentPlayers: (appid: number) =>
+    get<PlayersResponse>(
+      apiUrl('/ISteamUserStats/GetNumberOfCurrentPlayers/v1/', { appid: String(appid) })
+    ),
+
+  getAchievements: (appid: number) =>
+    get<AchievementsResponse>(
+      apiUrl('/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/', { gameid: String(appid) })
+    ),
 }
