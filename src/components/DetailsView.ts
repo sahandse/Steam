@@ -1,5 +1,6 @@
 import { steamApi } from '../api/steam'
-import type { DLCBasicInfo, Review, ReviewSummary, AchievementPercent } from '../types/steam'
+import type { DLCBasicInfo, Review, ReviewSummary, AchievementPercent, SteamApp } from '../types/steam'
+import { isInWishlist, toggleWishlist } from '../utils/wishlist'
 
 const SCORE_FA: Record<string, string> = {
   'Overwhelmingly Positive': 'بی‌نهایت مثبت',
@@ -101,10 +102,32 @@ function renderAchievements(list: AchievementPercent[]): string {
     <p class="ach-total">مجموع: ${list.length} دستاورد</p>`
 }
 
+function similarCard(app: SteamApp, onClick: (id: number) => void): HTMLElement {
+  const el = document.createElement('div')
+  el.className = 'game-card'
+  el.tabIndex = 0
+  const price = app.price
+    ? app.price.discount_percent > 0
+      ? `<span class="badge-discount">٪${app.price.discount_percent}-</span><span class="price-final">${app.price.final_formatted}</span>`
+      : `<span class="price-final">${app.price.final_formatted}</span>`
+    : '<span class="free-label">رایگان</span>'
+  el.innerHTML = `
+    <div class="card-image-wrap"><img src="${app.tiny_image}" alt="${app.name}" loading="lazy" /></div>
+    <div class="card-body">
+      <h3 class="card-title">${app.name}</h3>
+      <div class="price-row">${price}</div>
+    </div>`
+  const go = () => onClick(app.id)
+  el.addEventListener('click', go)
+  el.addEventListener('keydown', (e) => { if (e.key === 'Enter') go() })
+  return el
+}
+
 export async function renderDetailsView(
   container: HTMLElement,
   appid: number,
-  onBack: () => void
+  onBack: () => void,
+  onAppClick: (id: number) => void = () => {}
 ): Promise<void> {
   container.innerHTML = `<div class="loading-state"><div class="spinner"></div><p>در حال بارگذاری...</p></div>`
 
@@ -167,10 +190,22 @@ export async function renderDetailsView(
             <div id="ach-section" style="display:none"></div>
 
             <div id="dlc-section"></div>
+
+            <!-- Similar games -->
+            <div class="sub-heading" style="margin-top:28px">بازی‌های مشابه</div>
+            <div id="similar-grid" class="game-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
+              ${Array(4).fill('<div class="skeleton skeleton-card"></div>').join('')}
+            </div>
           </div>
 
           <aside class="details-sidebar">
             ${meta}
+
+            <!-- Wishlist button -->
+            <button class="wishlist-btn" id="wishlist-btn">
+              <span id="wish-icon">${isInWishlist(appid) ? '♥' : '♡'}</span>
+              <span id="wish-label">${isInWishlist(appid) ? 'در علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'}</span>
+            </button>
 
             <!-- Live players -->
             <div class="stat-block" id="players-block">
@@ -194,6 +229,33 @@ export async function renderDetailsView(
     `
 
     container.querySelector('#back')?.addEventListener('click', onBack)
+
+    // ── Wishlist toggle ──
+    const wishBtn = container.querySelector('#wishlist-btn') as HTMLButtonElement
+    const wishIcon = container.querySelector('#wish-icon') as HTMLElement
+    const wishLabel = container.querySelector('#wish-label') as HTMLElement
+    wishBtn.addEventListener('click', () => {
+      const price = app.price_overview?.final_formatted ?? (app.is_free ? 'رایگان' : '—')
+      const added = toggleWishlist({ id: appid, name: app.name, image: app.header_image, price })
+      wishIcon.textContent = added ? '♥' : '♡'
+      wishLabel.textContent = added ? 'در علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'
+      wishBtn.classList.toggle('active', added)
+    })
+    if (isInWishlist(appid)) wishBtn.classList.add('active')
+
+    // ── Similar games ──
+    const similarGrid = container.querySelector('#similar-grid') as HTMLElement
+    const firstGenre = app.genres?.[0]?.description
+    if (firstGenre) {
+      steamApi.search(firstGenre).then((data) => {
+        similarGrid.innerHTML = ''
+        const similar = (data.items ?? []).filter((a) => a.id !== appid).slice(0, 8)
+        if (similar.length) similar.forEach((a) => similarGrid.appendChild(similarCard(a, onAppClick)))
+        else similarGrid.innerHTML = '<p class="empty-msg">بازی مشابهی یافت نشد.</p>'
+      }).catch(() => { similarGrid.innerHTML = '' })
+    } else {
+      similarGrid.innerHTML = ''
+    }
 
     // ── Current players (sidebar) ──
     const playersEl = container.querySelector('#players-block') as HTMLElement

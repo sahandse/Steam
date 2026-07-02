@@ -816,6 +816,131 @@ a { color: var(--accent); text-decoration: none; }
   direction: ltr;
 }
 
+/* ── Wishlist badge in header ── */
+.nav-wish { position: relative; padding-left: 10px; }
+.wish-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  font-size: .65rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-right: 3px;
+  vertical-align: middle;
+  background: transparent;
+  color: transparent;
+  transition: background .2s, color .2s;
+}
+.wish-badge.has-items {
+  background: var(--red);
+  color: #fff;
+}
+
+/* ── Wishlist button on details sidebar ── */
+.wishlist-btn {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: .875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s var(--ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.wishlist-btn:hover { border-color: var(--border-hover); color: var(--text); }
+.wishlist-btn.active {
+  background: rgba(224,82,82,.12);
+  border-color: rgba(224,82,82,.5);
+  color: var(--red);
+}
+
+/* ── Wishlist view ── */
+.wish-count {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+.wish-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  color: var(--muted);
+  text-align: center;
+  grid-column: 1 / -1;
+}
+.wish-empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: .4; }
+.wish-empty p { font-size: .9rem; }
+
+.wish-remove-btn {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(12,12,12,.75);
+  color: var(--muted);
+  font-size: .7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .15s, color .15s, background .15s;
+  line-height: 1;
+  padding: 0;
+}
+.game-card:hover .wish-remove-btn { opacity: 1; }
+.wish-remove-btn:hover { background: var(--red); color: #fff; }
+
+/* ── Similar games grid ── */
+.similar-title {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 24px 0 12px;
+}
+.similar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+.similar-skeleton { height: 155px; }
+
+/* ── Random game button ── */
+.btn-random {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 5px 13px;
+  border-radius: 20px;
+  font-family: var(--font);
+  font-size: .8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s var(--ease);
+}
+.btn-random:hover { color: var(--text); border-color: var(--border-hover); background: var(--surface-2); }
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

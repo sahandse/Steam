@@ -50,6 +50,8 @@ export function renderSuggestView(
 ): void {
   let activeGenre = GENRES[0]
 
+  let currentItems: SteamApp[] = []
+
   container.innerHTML = `
     <div class="section-title">پیشنهاد بازی</div>
     <div class="suggest-genres">
@@ -59,7 +61,10 @@ export function renderSuggestView(
     </div>
     <div class="suggest-header">
       <span id="genre-label" style="font-size:.9rem;color:var(--muted)">بازی‌های ${activeGenre.fa}</span>
-      <span id="result-count" class="suggest-count"></span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="result-count" class="suggest-count"></span>
+        <button id="random-btn" class="btn-random" title="بازی تصادفی">🎲 تصادفی</button>
+      </div>
     </div>
     <div id="suggest-grid" class="game-grid">
       ${Array(8).fill('<div class="skeleton skeleton-suggest"></div>').join('')}
@@ -74,6 +79,7 @@ export function renderSuggestView(
     grid.innerHTML = Array(8).fill('<div class="skeleton skeleton-suggest"></div>').join('')
     label.textContent = `بازی‌های ${genre.fa}`
     count.textContent = ''
+    currentItems = []
 
     try {
       const data = await steamApi.search(genre.en, String(Math.floor(Math.random() * 3) + 1))
@@ -85,12 +91,19 @@ export function renderSuggestView(
       }
 
       const shuffled = [...data.items].sort(() => Math.random() - 0.5).slice(0, 12)
+      currentItems = shuffled
       shuffled.forEach((app) => grid.appendChild(appCard(app, onAppClick)))
       count.textContent = `${data.total} بازی`
     } catch {
       grid.innerHTML = '<p class="error-msg">خطا در بارگذاری پیشنهادات.</p>'
     }
   }
+
+  container.querySelector('#random-btn')!.addEventListener('click', () => {
+    if (!currentItems.length) return
+    const pick = currentItems[Math.floor(Math.random() * currentItems.length)]
+    onAppClick(pick.id)
+  })
 
   container.querySelectorAll('.genre-btn').forEach((btn) => {
     btn.addEventListener('click', () => {

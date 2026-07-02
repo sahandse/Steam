@@ -157,4 +157,4 @@ export interface AchievementsResponse {
   achievementpercentages: { achievements: AchievementPercent[] }
 }
 
-export type View = 'home' | 'search' | 'details' | 'market' | 'suggest'
+export type View = 'home' | 'search' | 'details' | 'market' | 'suggest' | 'wishlist'

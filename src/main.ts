@@ -5,6 +5,7 @@ import { renderSearchView } from './components/SearchView'
 import { renderDetailsView } from './components/DetailsView'
 import { renderMarketView } from './components/MarketView'
 import { renderSuggestView } from './components/SuggestView'
+import { renderWishlistView } from './components/WishlistView'
 import type { View } from './types/steam'
 
 const app = document.querySelector<HTMLDivElement>('#app')!
@@ -38,10 +39,13 @@ function navigateTo(view: View, data?: unknown): void {
       renderSuggestView(main, (id) => navigateTo('details', id))
       break
     case 'details':
-      if (typeof data === 'number') renderDetailsView(main, data, () => navigateTo(prevView))
+      if (typeof data === 'number') renderDetailsView(main, data, () => navigateTo(prevView), (id) => navigateTo('details', id))
       break
     case 'market':
       renderMarketView(main)
+      break
+    case 'wishlist':
+      renderWishlistView(main, (id) => navigateTo('details', id))
       break
   }
 }

@@ -1,8 +1,11 @@
 import type { View } from '../types/steam'
+import { getWishlist } from '../utils/wishlist'
 
 export function renderHeader(onNavigate: (view: View) => void, activeView: View): HTMLElement {
   const header = document.createElement('header')
   header.className = 'app-header'
+
+  const wishCount = getWishlist().length
 
   const navItems: { label: string; view: View }[] = [
     { label: 'خانه', view: 'home' },
@@ -17,6 +20,9 @@ export function renderHeader(onNavigate: (view: View) => void, activeView: View)
         ${navItems.map(({ label, view }) =>
           `<button class="nav-btn${view === activeView ? ' active' : ''}" data-view="${view}">${label}</button>`
         ).join('')}
+        <button class="nav-btn nav-wish${activeView === 'wishlist' ? ' active' : ''}" data-view="wishlist">
+          ♥<span class="wish-badge${wishCount > 0 ? ' has-items' : ''}">${wishCount > 0 ? wishCount : ''}</span>
+        </button>
       </nav>
       <div class="logo" role="button" tabindex="0">
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
